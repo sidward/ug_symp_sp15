@@ -1,0 +1,190 @@
+\documentclass[t]{beamer}
+
+\usetheme{Berkeley}
+
+\usepackage[orientation=landscape, size=a0, scale=1.4]{beamerposter}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+
+\setlength{\TPHorizModule}{1cm}
+\setlength{\TPVertModule}{1cm}
+
+\newcommand{\n}{\par \smallskip}
+\newcommand{\nn}{\n \par \smallskip}  
+\newcommand{\f}{\n \hrule \n}
+\newcommand{\s}[1]{\textbf{#1}}
+\newcommand{\img}[2]{\begin{figure}[htp]\fcolorbox{black}{white}{\includegraphics[width=#2\textwidth]{#1}}\end{figure}}
+\newcommand{\imgnobox}[2]{\begin{figure}[htp]\includegraphics[width=#2\textwidth]{#1}\end{figure}}
+\newcommand{\colwidth}{37.1333}
+
+\newcommand{\TODO}{{\color{red}TODO}}
+\newcommand{\TODOC}[1]{\TODO{\color{red}\{#1\}}}
+
+\begin{document}
+
+\begin{textblock}{104.8}(3, 2.5)
+\begin{block}{\center \Large $T_2$ Shuffling - Dynamic MRI Dimensionality Reduction}
+\center \text{\large Siddharth Iyer, Jonathan I.\ Tamir, Michael Lustig} \par \bigskip
+Department of Electrical Engineering and Computer Sciences,  University of California at Berkeley, Berkeley, CA
+\end{block}
+\end{textblock}
+\begin{textblock}{8.09}(109.3,2.5)
+\begin{block}{\vspace*{-3ex}}
+\imgnobox{seal.png}{0.87}
+\end{block}
+\end{textblock}
+
+{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setbeamercolor{block body}{bg=white}
+%\setbeamercolor{block title}{#3}
+
+
+% left column
+\begin{textblock}{\colwidth}(3,11.5)
+  \begin{frame}
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Introduction
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Introduction}
+  \begin{itemize}
+  \item MRI is a safe and powerful tool that can be used to
+  image both anatomy and function. 
+  \item Acquiring 3D MRI over time has several clinical applications:
+    \begin{itemize}
+    \item Reduce image blur from conventional 3D acquisition.
+    \item Visualize signal behavior over time.
+    \item Quantify tissue parameters in anatomy.
+    \end{itemize}
+  \item We aim to find a robust and low-dimensional representation of 
+  the dynamic images.
+  \end{itemize}
+  \end{block}
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Motivation
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Motivation}
+  \begin{itemize}
+  \item The image's Fourier transform (called k-space) is sampled over time. 
+  \item The samples are grouped into time-consistent k-space bins.
+  \imgnobox{acq_over_time.png}{0.9}\n
+  \item \underline{Goal:} Clinically feasible scan times by reducing dimensionality with low model error.
+  \end{itemize}
+  \end{block}
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Background
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+  \begin{block}{Background}
+  Signal evolution of pixel intensity over time parametrized by tissue
+  $T_2$ relaxation.
+  \imgnobox{pix_time.png}{0.91}
+  Signals evolutions are correlated $\implies$ data captured by a low-dimensional
+  subspace.
+  \begin{enumerate}
+  \item Estimate $T_2$ distribution from tissue in anatomy of interest.
+  \item Simulate curves with $T_2$ values drawn from distribution.
+  \item Form matrix $X$ with signals as columns arranged in increasing order of $\ell_2$ norm.
+  \end{enumerate}
+  \end{block}
+  \end{frame}
+\end{textblock}
+
+% middle column
+%\begin{textblock}{\colwidth}(41.6333,11.5)
+\begin{textblock}{\colwidth}(41.6333,10.05)
+  \begin{frame}
+  \begin{block}{\vspace*{-3ex}}
+  \imgnobox{T2data.png}{0.9}
+  \end{block}
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Methods
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Methods and Results}
+  \begin{itemize}
+  \item {\underline{Principal Component Analysis:}}
+  Project $X$ onto first 3 principal components, $U$. This solves:
+  $$\underset{U, A}{\text{min}} \quad ||X - UA||_F^2$$ 
+  Estimated matrix $X' = UA$. Normalized model error of $X_i'$:
+  \imgnobox{bad_svd.png}{0.5} 
+  \item {\underline{Multilayer Linear Regressor:}}
+  Inspired by Neural Networks, this only uses linear transformations.
+  \imgnobox{neural_network.png}{0.6}
+  \begin{align*}
+  U &\leftarrow \theta_2 \\ A &\leftarrow \theta_1 X
+  \end{align*}
+  This framework is used to solve:
+    $$\underset{U, A}{\text{min}} \quad \underset{i}{\text{max}} \quad ||X_i - Ua_i||_2^2$$ 
+  \imgnobox{good_nn.png}{0.5}
+  \end{itemize}
+  \end{block}
+  \end{frame}
+\end{textblock}
+
+% right column
+% \begin{textblock}{\colwidth}(80.2667,11.5)
+\begin{textblock}{\colwidth}(80.2667,10.05)
+  \begin{frame}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Methods continued
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{\vspace*{-3ex}}
+  \imgnobox{algo.png}{0.85}
+  \begin{itemize}
+  \item{\underline{Results}}
+  $$\begin{tabular}{|c|c|c|} \hline
+   & \text{PCA} & \text{MLR} \\ \hline
+  \text{Global Error} & 0.33\%&   2.46\% \\ \hline
+  \text{Maximal Error} & 11.1\% & 4.50\% \\ \hline
+  \end{tabular}$$
+  \end{itemize}
+  \end{block}
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Discussion and Conclusion
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Discussion and Conclusion}
+  \begin{itemize}
+  \item Our flexible framework enables the evaluation of different cost functions.
+  \item We produce a low-dimensional representation
+  with lower maximal error at a small cost of global error.
+  \end{itemize}
+  \end{block} 
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Future Work
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Future Work}
+  \begin{itemize}
+  \item \underline{$T_2$ mapping and classification:} Classifying $T_2$ values from signal evolutions.
+  \imgnobox{future.png}{0.8}
+  \end{itemize}
+  \end{block} 
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % References
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+  \begin{block}{References}
+  [1] Tamir JI, Lai P, Uecker M, Lustig M. Reduced blurring in 3D fast spin echo through joint temporal espirit reconstruction. Proc. Intl. Soc. Mag. Reson. Med. 22 2014; p. 0616. \n
+  [2] Busse RF, Hariharan H, Vu A, Brittain JH. Fast spin echo sequences with very long echo trains: design of variable refocusing flip angle schedules and generation of clinical t2 contrast. Magn Reson Med 2006; 55:1030–7. 
+  \end{block} 
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Acknowledgements
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{block}{Acknowledgements}
+  I would like to thank Jonathan Tamir for allowing me to work with him on his project, Prof. Michael Lustig for letting me be a part of his research group and all the MikGroup members for making me feel welcome.
+  \end{block}
+  \end{frame}
+\end{textblock}
+}
+  
+\end{document}
+
+
